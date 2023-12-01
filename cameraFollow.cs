@@ -1,19 +1,33 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class cameraFollow : MonoBehaviour
-{
-    public Transform target;
-    public Vector3 offset;
-    public float damping;
-    // Start is called before the first frame update
-    private Vector3 velocity = Vector3.zero;
+public class MovingCamera : MonoBehavior {
 
-    // Update is called once per frame
-    void Update()
+    // Should be the same value as defined on 
+    // Pixel Perfect Camera script
+    public float pixelPerUnit = 32.0f;
+    public float cameraSpeed;
+    public GameObject cameraObject;
+    public GameObject objectToFollow;
+
+    private float multiple;
+ 
+    void Start() 
     {
-        Vector3 movePosition = target.position + offset;
-        transform.position = Vector3.SmoothDamp(transform.position, movePosition, ref velocity, damping);
+        // Calculates the minimum size of a screen pixel
+        multiple = 1.0f / pixelPerUnit;
     }
+
+    // This function rounds to a multiple of pixel 
+    // screen value based on pixel per unit
+    private float RoundToMultiple(float value, float multipleOf)
+    {
+        // Using Mathf.Round at each frame is a performance killer
+        return (int)((value / multipleOf) + 0.5f) * multipleOf;
+    }
+
+    private void FixedUpdate() {
+        float t = RoundToMultiple(cameraSpeed * Time.deltaTime, multiple);
+        cameraObject.transform.position = Vector3.Lerp(cameraObject.transform.position, objectToFollow.transform.position, t);
+    }
+
 }
